@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "handsight", "handsense\handsight.csproj", "{D8131084-4C0F-4790-856A-AD472B68ECDA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM = Debug|ARM
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|ARM = Release|ARM
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Debug|ARM.ActiveCfg = Debug|ARM
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Debug|ARM.Build.0 = Debug|ARM
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Debug|ARM.Deploy.0 = Debug|ARM
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Debug|x86.ActiveCfg = Debug|x86
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Debug|x86.Build.0 = Debug|x86
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Debug|x86.Deploy.0 = Debug|x86
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Release|ARM.ActiveCfg = Release|ARM
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Release|ARM.Build.0 = Release|ARM
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Release|ARM.Deploy.0 = Release|ARM
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Release|x86.ActiveCfg = Release|x86
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Release|x86.Build.0 = Release|x86
+		{D8131084-4C0F-4790-856A-AD472B68ECDA}.Release|x86.Deploy.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
