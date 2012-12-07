@@ -1,7 +1,10 @@
-const int irLED = 7;
-const int emitter = 4;
-const int collector = A0;
-const int vibration = 11;
+const int irLED = 7; //blue (with 220ohm)
+//const int emitter = 4; //(vcc) (don't need)
+const int collector = A0; //yellow (with pullup resistor) 
+const int vibration = 11; //red
+//orange goes to ground
+//green goes to ground
+//brown goes to ground
 
 const int detectionThreshold = 1010;
 const int whiteThreshold = 700;
@@ -11,12 +14,13 @@ int counter = 0;
 int counter2 = 0;
 
 void setup() {
+ digitalWrite(collector, HIGH);  // set pullup 
  pinMode(irLED, OUTPUT);
- pinMode(emitter, OUTPUT);
+// pinMode(emitter, OUTPUT);
  pinMode(vibration, OUTPUT);
  
  digitalWrite(irLED, HIGH);
- digitalWrite(emitter, HIGH);
+// digitalWrite(emitter, HIGH);
  //digitalWrite(vibration, HIGH);
  
  Serial.begin(115200);       // use the serial port 
@@ -44,4 +48,3 @@ void loop() {
   lastReading = reading;
   delay(10);  // delay to avoid overloading the serial port buffer
 }
-
