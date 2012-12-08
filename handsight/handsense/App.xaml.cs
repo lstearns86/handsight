@@ -6,9 +6,9 @@ using System.Windows.Markup;
 using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
-using handsense.Resources;
+using handsight.Resources;
 
-namespace handsense
+namespace handsight
 {
     public partial class App : Application
     {

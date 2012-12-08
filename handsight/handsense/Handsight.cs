@@ -11,7 +11,7 @@ using Windows.Networking;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 
-namespace handsense
+namespace handsight
 {
     class Handsight
     {
@@ -24,6 +24,7 @@ namespace handsense
             _socket = socket;
             _dataWriter = new DataWriter(_socket.OutputStream);
             _dataReader = new DataReader(_socket.InputStream);
+            
             StartListening();
         }
 
@@ -41,7 +42,8 @@ namespace handsense
                 {
                     try
                     {
-                        await _dataReader.LoadAsync(1);
+
+                        uint count = await _dataReader.LoadAsync(1);
                         buffer[bufferIndex] = (char)_dataReader.ReadByte();
                         if (buffer[bufferIndex] == '\n')
                         {

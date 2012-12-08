@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
-using handsense.Resources;
+using handsight.Resources;
 using System.Windows.Shapes;
 using System.Windows.Media;
 
@@ -22,7 +22,7 @@ using Windows.Storage.Streams;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace handsense
+namespace handsight
 {
     public partial class MainPage : PhoneApplicationPage
     {
@@ -131,10 +131,10 @@ namespace handsense
                 //ValueLabel.Text = "Value: " + value;
 
                 lines[0].Y1 = (1 - values[0] / 1024.0) * Graph.Height;
-                lines[1].Y1 = (1 - values[1] / 1024.0) * Graph.Height;
-                lines[2].Y1 = (1 - values[2] / 1024.0) * Graph.Height;
-                lines[3].Y1 = (1 - values[3] / 1024.0) * Graph.Height;
-                lines[4].Y1 = (1 - values[4] / 1024.0) * Graph.Height;
+                //lines[1].Y1 = (1 - values[1] / 1024.0) * Graph.Height;
+                //lines[2].Y1 = (1 - values[2] / 1024.0) * Graph.Height;
+                //lines[3].Y1 = (1 - values[3] / 1024.0) * Graph.Height;
+                //lines[4].Y1 = (1 - values[4] / 1024.0) * Graph.Height;
 
                 //for (int i = 0; i < lines.Count - 1; i++)
                 //{

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2012/deployment" AppPlatformVersion="8.0">
   <DefaultLanguage xmlns="" code="en-US" />
-  <App xmlns="" ProductID="{d8131084-4c0f-4790-856a-ad472b68ecda}" Title="handsense" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="handsense author" Description="Sample description" Publisher="handsense" PublisherID="{58449e2a-9248-4c93-b83c-724a45c8bc34}">
+  <App xmlns="" ProductID="{d8131084-4c0f-4790-856a-ad472b68ecda}" Title="handsight" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="Lee Stearns" Description="Sample description" Publisher="Lee Stearns" PublisherID="{58449e2a-9248-4c93-b83c-724a45c8bc34}">
     <IconPath IsRelative="true" IsResource="false">Assets\ApplicationIcon.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING" />
@@ -20,7 +20,7 @@
           <SmallImageURI IsRelative="true" IsResource="false">Assets\Tiles\FlipCycleTileSmall.png</SmallImageURI>
           <Count>0</Count>
           <BackgroundImageURI IsRelative="true" IsResource="false">Assets\Tiles\FlipCycleTileMedium.png</BackgroundImageURI>
-          <Title>handsense</Title>
+          <Title>handsight</Title>
           <BackContent></BackContent>
           <BackBackgroundImageURI></BackBackgroundImageURI>
           <BackTitle></BackTitle>

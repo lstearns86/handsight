@@ -1,6 +1,6 @@
-﻿using handsense.Resources;
+﻿using handsight.Resources;
 
-namespace handsense
+namespace handsight
 {
     /// <summary>
     /// Provides access to string resources.
