@@ -6,14 +6,24 @@ const int vibrations[] = {3,5,6,9}; //red
 //green goes to ground
 //brown goes to ground
 
-const int detectionThreshold = 1010;
-const int whiteThreshold = 700;
+const int detectionThreshold = 940;
+const int whiteThreshold = 600;
 
 int lastReadings[] = {1023, 1023, 1023, 1023};
 int counters[] = {0, 0, 0, 0};
+int black_mode_counters[] = {0, 0, 0, 0};
 int counter2 = 0;
 
 const int numFingers = 4;
+
+//mapping from finger bits to characters
+const char mapping[]="# aroslyepxmhgujtndcwbq?ifkz.v^<";
+int backspace_initial_delay=200;
+int backspace_repeat_delay=50;
+int backspace_time=0;
+int backspace_repeat=0;
+int been_on=0;
+int off_count=0;
 
 void setup() {
   for(int i=0; i<numFingers; i++) {
@@ -31,7 +41,7 @@ void loop() {
   counter2++;
   for(int i=0; i<numFingers; i++) {
     counters[i]++;
-    if(counters[i] > 4) {
+    if(counters[i] > 40) {
       digitalWrite(vibrations[i], LOW);
     }
   }
@@ -40,7 +50,7 @@ void loop() {
    readings[i] = analogRead(collectors[i]);
   }
   
-  if(counter2 >= 5) {
+  if(counter2 >= 50) {
     for(int i=0; i<numFingers-1; i++) {
       Serial.print(readings[i]);
       Serial.print(",");
@@ -49,14 +59,65 @@ void loop() {
     counter2 = 0;
   }
   
-  for(int i=0; i<numFingers; i++) {
+  //theshold crossing mode
+ /* for(int i=0; i<numFingers; i++) {
     if(counters[i] > 10 && lastReadings[i] < detectionThreshold && readings[i] < detectionThreshold && 
     ((lastReadings[i] < whiteThreshold && readings[i] >= whiteThreshold) || (lastReadings[i] >= whiteThreshold && readings[i] < whiteThreshold))) {
       digitalWrite(vibrations[i], HIGH);
       counters[i] = 0;
     }
     lastReadings[i] = readings[i];
+   }*/
+   
+   
+   //vibrate on black mode
+   /*for(int i=0; i<numFingers; i++) {
+     digitalWrite(vibrations[i], readings[i]<detectionThreshold && readings[i]>whiteThreshold);
+   }*/
+   
+   //vibrate on black mode (with minimum vibration time)
+   for(int i=0; i<numFingers; i++) {
+     if(readings[i]<detectionThreshold && readings[i]>whiteThreshold) {
+       black_mode_counters[i]=90;
+     }
+     if(black_mode_counters[i]>0) {
+       digitalWrite(vibrations[i], HIGH);
+       black_mode_counters[i]--;
+     }
+     else {
+       digitalWrite(vibrations[i], LOW);
+     }
    }
+   
+   //massage mode
+ /*  for(int i=0; i<numFingers; i++) {
+     digitalWrite(vibrations[i], readings[i]<detectionThreshold);
+   }*/
+   
+   //typing mode
+ /*  int currently_on=0;
+   int keys_down=0;
+   for(int i=0; i<numFingers; i++) {
+     int button_down = readings[i]<detectionThreshold;
+     digitalWrite(vibrations[i], button_down);
+     currently_on=currently_on<<1 | button_down;
+     keys_down += button_down;
+   }
+   if(been_on && !currently_on) {
+     char outkey=mapping[been_on];
+     Serial.write(outkey);
+     been_on = 0;
+   }
+   been_on|=currently_on;*/
+   
+   //analog mode
+//   for(int i=0; i<numFingers; i++) {
+//     if(readings[i]<detectionThreshold && readings[i]>70) {
+//       analogWrite(vibrations[i], readings[i]/4);
+//     } else {
+//       digitalWrite(vibrations[i], 0);
+//     }
+//   }
   
-  delay(10);  // delay to avoid overloading the serial port buffer
+  delay(1);  // delay to avoid overloading the serial port buffer
 }
