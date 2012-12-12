@@ -11,9 +11,10 @@
 // pin numbers
 const int irLED = 7; // wire connected to transistor/220 ohm resistor (all on same pin)
 const int collectors[] = {A0,A1,A2,A3}; // (with pullup resistors)
-const int vibrations[] = {3,5,6,9};
+const int vibrations[] = {3,5,6,9}; // vibration motors
 const int modeLED = 13; // flash the LED on this pin to indicate mode
-boolean modeLEDon = false;
+const int echo[] = {2, 10}; // pins to receive echo pulses
+const int trig[] = {4, 11}; // pins to send trigger pulses
 
 // thresholds for each finger
 const int detectionThreshold[] = {940,940,940,940};
@@ -21,6 +22,7 @@ const int whiteThreshold[] = {600,600,600,600};
 
 // timers (in milliseconds)
 int lastVibration[] = {0,0,0,0};
+int lastPing = 0;
 
 // modes
 const int MODE_EDGES = 0;
@@ -31,6 +33,7 @@ const int MODE_TYPING = 4;
 const int MODE_MASSAGE = 5;
 const int numModes = 6;
 int mode = MODE_EDGES;
+boolean modeLEDon = false;
 int modeLightStart = 0;
 
 // miscellaneous
@@ -40,11 +43,19 @@ int readings[] = {1023, 1023, 1023, 1023, 1023, 1023};
 int lastReadings[] = {1023, 1023, 1023, 1023, 1023, 1023};
 const int serialRate = 100; // in milliseconds
 int lastSerialWrite = 0;
+const int pingRate = 50; // in milliseconds
 
 // edge detection
 boolean vibrating[] = {false, false, false, false};
 const int vibrationDuration = 80;
 const int vibrationDelay = 50; // time between vibrations
+
+// navigation
+int triggerPullDown = 2;        // in microseconds
+int pingWidth = 10;             // in microseconds
+int maxDist = 200;               // in cm
+int echoTimeout = maxDist * 2 * 29; // in microseconds
+// timeout derivation from user JamesHappy on arduino.cc forum: http://arduino.cc/forum/index.php?topic=55119.0
 
 // typing
 // mapping from finger bits to characters
@@ -78,6 +89,13 @@ void setup()
    digitalWrite(modeLED, LOW);
    
    for(int i = 0; i<16; i++) textBuffer[i] = 0;
+   
+   //setup distance sensors
+   for(int i = 0; i < numUltrasonic; i++)
+   {
+     pinMode(echo[i], INPUT);
+     pinMode(trig[i], OUTPUT);
+   }
  
    Serial.begin(115200); // use the serial port, this baud rate required for bluetooth (default bluetooth anyways)
 }
@@ -250,6 +268,70 @@ void massageLoop()
   }
 }
 
+void navLoop()
+{
+  int now = millis();
+  
+  if(now - lastPing > pingRate)
+  {
+    for(int i = 0; i < numUltrasonic; i++)
+    {
+      // Send a ping
+      digitalWrite(trig[i], LOW);
+      delayMicroseconds(triggerPullDown);
+      digitalWrite(trig[i], HIGH);
+      delayMicroseconds(pingWidth);
+      digitalWrite(trig[i], LOW);
+      
+      // Listen for echo and compute distance
+      float dist = pulseIn(echo[i], HIGH, echoTimeout);
+      dist = dist/58; // convert to centimeters
+      if(dist <= 0) dist = maxDist;
+      
+      readings[numFingers+i] = dist;
+    }
+    
+    //vibrate (1.5 meters = no vibration, 10cm = full intensity)
+    for(int i = 0; i < numUltrasonic; i++)
+    {
+      int v = (readings[numFingers+i]-10)/150*256;
+      v=v>255 ? 255 : v;
+      v=v<0 ? 0 : v;
+      analogWrite(vibrations[i*3], 255-v);
+    }
+    
+    lastPing = millis();
+  }
+}
+
+void typingLoop()
+{
+  // get the current readings
+  for(int i = 0; i < numFingers; i++)
+    readings[i] = analogRead(collectors[i]);
+  
+  //typing mode
+  int currently_on=0;
+  int keys_down=0;
+  for(int i=0; i<numFingers; i++) {
+    int button_down = readings[i]<detectionThreshold[i];
+    digitalWrite(vibrations[i], button_down);
+    currently_on=currently_on<<1 | button_down;
+    keys_down += button_down;
+  }
+  if(been_on && !currently_on) {
+    char outkey=mapping[been_on];
+    for(int j = 0; j < 16; j++)
+      if(textBuffer[j] == 0)
+      {
+        textBuffer[j] = outkey;
+        break;
+      }
+    been_on = 0;
+  }
+  been_on|=currently_on;
+}
+
 void loop() {
   serialRead();
   flashMode();
@@ -257,6 +339,8 @@ void loop() {
   {
     case MODE_EDGES: edgeLoop(); break;
     case MODE_BLACK: blackLoop(); break;
+    case MODE_GRAYSCALE: grayscaleLoop(); break;
+    case MODE_NAVIGATION: navLoop(); break;
     case MODE_MASSAGE: massageLoop(); break;
     default: break;
   }
