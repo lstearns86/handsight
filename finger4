@@ -25,6 +25,24 @@ int backspace_repeat=0;
 int been_on=0;
 int off_count=0;
 
+//variables for distance sensors
+/*
+ * Define the pins you want to use as trigger and echo.
+ */
+
+#define ECHOPIN1 2              // Pin to receive echo pulse
+#define TRIGPIN1 4              // Pin to send trigger pulse
+#define ECHOPIN2 10             // Pin to receive echo pulse
+#define TRIGPIN2 11             // Pin to send trigger pulse
+
+int triggerPullDown = 2;        // in microseconds
+int pingWidth = 10;             // in microseconds
+int maxDist = 200;               // in cm
+int timeout = maxDist * 2 * 29; // in microseconds
+// timeout derivation from user JamesHappy on arduino.cc forum: http://arduino.cc/forum/index.php?topic=55119.0
+
+
+
 void setup() {
   for(int i=0; i<numFingers; i++) {
     digitalWrite(collectors[i], HIGH);  // set pullup 
@@ -35,9 +53,66 @@ void setup() {
    digitalWrite(irLED, HIGH);
  
    Serial.begin(115200);       // use the serial port, this baud rate required for bluetooth (default bluetooth anyways)
+   
+   //setup distance sensors
+   pinMode(ECHOPIN1, INPUT);
+   pinMode(TRIGPIN1, OUTPUT);
+   pinMode(ECHOPIN2, INPUT);
+   pinMode(TRIGPIN2, OUTPUT);
+}
+
+
+void distance_loop() {
+  // Send a ping on 1
+  digitalWrite(TRIGPIN1, LOW);
+  delayMicroseconds(triggerPullDown);
+  digitalWrite(TRIGPIN1, HIGH);
+  delayMicroseconds(pingWidth);
+  digitalWrite(TRIGPIN1, LOW);
+  
+  // Listen for echo and compute distance
+  float distance1 = pulseIn(ECHOPIN1, HIGH, timeout);
+  distance1= distance1/58; // convert to centimeters
+  if(distance1 <= 0) distance1 = maxDist;
+  
+  // Send a ping on 2
+  digitalWrite(TRIGPIN2, LOW);
+  delayMicroseconds(triggerPullDown);
+  digitalWrite(TRIGPIN2, HIGH);
+  delayMicroseconds(pingWidth);
+  digitalWrite(TRIGPIN2, LOW);
+  
+  // Listen for echo and compute distance
+  float distance2 = pulseIn(ECHOPIN2, HIGH, timeout);
+  distance2= distance2/58; // convert to centimeters
+  if(distance2 <= 0) distance2 = maxDist;
+  
+  //vibrate (1.5 meters = no vibration, 10cm = full intensity)
+  int vibration1=(distance1-10)/150*256;
+  vibration1=vibration1>255 ? 255 : vibration1;
+  vibration1=vibration1<0 ? 0 : vibration1;
+  int vibration2=(distance2-10)/150*256;
+  vibration2=vibration2>255 ? 255 : vibration2;
+  vibration2=vibration2<0 ? 0 : vibration2;
+  analogWrite(vibrations[0], 255-vibration1);
+  analogWrite(vibrations[3], 255-vibration2);
+  
+  // Write distance readings to serial
+  Serial.print("=");
+  Serial.print(distance1);
+  Serial.print(",");
+  Serial.print(distance2);
+  Serial.println("");
+  
+  // Wait for residual echos to dissipate
+  delay(50);
 }
 
 void loop() {
+  //for now, just call distance_loop
+  distance_loop();
+  return;
+  
   counter2++;
   for(int i=0; i<numFingers; i++) {
     counters[i]++;
