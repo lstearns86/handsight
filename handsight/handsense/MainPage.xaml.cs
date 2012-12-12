@@ -33,16 +33,19 @@ namespace handsight
         //private Polyline line;
         private int[] sensors;
 
+        private enum Mode { Edges, Black, Grayscale, Navigation, Typing, Massage }
+        private Mode mode = Mode.Edges;
+
         // Constructor
         public MainPage()
         {
             InitializeComponent();
 
-            sensors = new int[5];
-            for (int i = 0; i < 5; i++)
+            sensors = new int[6];
+            for (int i = 0; i < 6; i++)
             {
                 Line line = new Line();
-                line.X1 = i * (Graph.Width - 100) / 5 + 75;
+                line.X1 = i * (Graph.Width - 100) / 6 + 75;
                 line.X2 = line.X1;
                 line.Y1 = 0;
                 line.Y2 = Graph.Height;
@@ -52,47 +55,6 @@ namespace handsight
                 lines.Add(line);
                 Graph.Children.Add(line);
             }
-
-            //for (int i = 0; i < Graph.Width / 3; i++)
-            //{
-            //    Line line = new Line();
-            //    line.X1 = 3 * i;
-            //    line.X2 = 3 * (i + 1);
-            //    line.Y1 = Graph.Height;
-            //    line.Y2 = Graph.Height;
-            //    line.Stroke = new SolidColorBrush(Colors.Blue);
-            //    line.Fill = new SolidColorBrush(Colors.Blue);
-            //    lines.Add(line);
-            //    Graph.Children.Add(line);
-            //}
-
-            //line = new Polyline();
-            //line.Stroke = new SolidColorBrush(Colors.Blue);
-            //PointCollection points = new PointCollection();
-            //for (int i = 0; i < Graph.Width / 2; i++)
-            //    points.Add(new System.Windows.Point(i * 2, Graph.Height));
-            //line.Points = points;
-            //Graph.Children.Add(line);
-
-            // TODO: Delete
-            //Task.Factory.StartNew(() =>
-            //{
-            //    Random rand = new Random();
-            //    Thread.Sleep(2000);
-            //    int last = 0;
-            //    while (true)
-            //    {
-            //        int value = last + rand.Next(20) - 10;
-            //        if (value < 0) value = 0;
-            //        if (value > 1023) value = 1023;
-            //        DeviceUpdate(value);
-            //        last = value;
-            //        Thread.Sleep(10);
-            //    }
-            //});
-
-            // Sample code to localize the ApplicationBar
-            //BuildLocalizedApplicationBar();
         }
 
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)
@@ -124,47 +86,40 @@ namespace handsight
             }
         }
 
-        private void DeviceUpdate(int[] values)
+        private void DeviceUpdate(int mode, int[] values, string text)
         {
             Dispatcher.BeginInvoke(() =>
             {
-                //ValueLabel.Text = "Value: " + value;
+                Mode newMode = (Mode)Enum.ToObject(typeof(Mode), mode);
+                if (newMode != this.mode)
+                {
+                    this.mode = newMode;
+                    switch (this.mode)
+                    {
+                        case Mode.Edges: EdgesButton.IsChecked = true; break;
+                        case Mode.Black: BlackButton.IsChecked = true; break;
+                        case Mode.Grayscale: GrayscaleButton.IsChecked = true; break;
+                        case Mode.Navigation: NavigationButton.IsChecked = true; break;
+                        case Mode.Typing: TypingButton.IsChecked = true; break;
+                        case Mode.Massage: MassageButton.IsChecked = true; break;
+                        default: break;
+                    }
+                }
 
-                lines[0].Y1 = (1 - values[0] / 1024.0) * Graph.Height;
-                //lines[1].Y1 = (1 - values[1] / 1024.0) * Graph.Height;
-                //lines[2].Y1 = (1 - values[2] / 1024.0) * Graph.Height;
-                //lines[3].Y1 = (1 - values[3] / 1024.0) * Graph.Height;
-                //lines[4].Y1 = (1 - values[4] / 1024.0) * Graph.Height;
-
-                //for (int i = 0; i < lines.Count - 1; i++)
-                //{
-                //    lines[i].Y1 = lines[i + 1].Y1;
-                //    lines[i].Y2 = lines[i + 1].Y2;
-                //}
-                //lines[lines.Count - 1].Y1 = lines[lines.Count - 1].Y2;
-                //lines[lines.Count - 1].Y2 = (1 - value / 1024.0) * Graph.Height;
+                for (int i = 0; i < 6; i++)
+                {
+                    sensors[i] = values[i];
+                    lines[i].Y1 = (1 - values[i] / 1024.0) * Graph.Height;
+                }
                 
-                //PointCollection points = new PointCollection();
-                //for (int i = 0; i < line.Points.Count - 1; i++)
-                //{
-                //    System.Windows.Point p = line.Points[i];
-                //    p.Y = line.Points[i + 1].Y;
-                //    points.Add(p);
-                //}
-                //System.Windows.Point newPoint = line.Points[line.Points.Count - 1];
-                //newPoint.Y = (1 - value / 1024.0) * Graph.Height;
-                //points.Add(newPoint);
-                //line.Points = points;
+                if (text.Length > 0)
+                {
+                    TextDisplay.Text += text;
+                    if (TextDisplay.Text.Length > 50)
+                        TextDisplay.Text = TextDisplay.Text.Substring(TextDisplay.Text.Length - 50, 50);
+                }
             });
 
-        }
-
-        private void VibrateButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (device != null && device.IsConnected)
-            {
-                device.ToggleVibrate();
-            }
         }
 
         private async Task<bool> SetupDeviceConn()
@@ -189,11 +144,8 @@ namespace handsight
             }
 
             StreamSocket s = new StreamSocket();
-            //await s.ConnectAsync(peerInfo.HostName, "1");
-
             //This would ask winsock to do an SPP lookup for us; i.e. to resolve the port the 
             //device is listening on
-            //await s.ConnectAsync(peerInfo.HostName, "{00001101-0000-1000-8000-00805F9B34FB}");
             try
             {
                 await s.ConnectAsync(peerInfo.HostName, "{00001101-0000-1000-8000-00805F9B34FB}");
@@ -204,20 +156,59 @@ namespace handsight
             return device.IsConnected;
         }
 
-        // Sample code for building a localized ApplicationBar
-        //private void BuildLocalizedApplicationBar()
-        //{
-        //    // Set the page's ApplicationBar to a new instance of ApplicationBar.
-        //    ApplicationBar = new ApplicationBar();
+        private void EdgesButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (mode != Mode.Edges)
+            {
+                mode = Mode.Edges;
+                if (device != null && device.IsConnected) device.SetMode((int)mode);
+            }
+        }
 
-        //    // Create a new button and set the text value to the localized string from AppResources.
-        //    ApplicationBarIconButton appBarButton = new ApplicationBarIconButton(new Uri("/Assets/AppBar/appbar.add.rest.png", UriKind.Relative));
-        //    appBarButton.Text = AppResources.AppBarButtonText;
-        //    ApplicationBar.Buttons.Add(appBarButton);
 
-        //    // Create a new menu item with the localized string from AppResources.
-        //    ApplicationBarMenuItem appBarMenuItem = new ApplicationBarMenuItem(AppResources.AppBarMenuItemText);
-        //    ApplicationBar.MenuItems.Add(appBarMenuItem);
-        //}
+        private void BlackButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (mode != Mode.Black)
+            {
+                mode = Mode.Black;
+                if(device != null && device.IsConnected) device.SetMode((int)mode);
+            }
+        }
+
+        private void GrayscaleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (mode != Mode.Grayscale)
+            {
+                mode = Mode.Grayscale;
+                if (device != null && device.IsConnected) device.SetMode((int)mode);
+            }
+        }
+
+        private void NavigationButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (mode != Mode.Navigation)
+            {
+                mode = Mode.Navigation;
+                if (device != null && device.IsConnected) device.SetMode((int)mode);
+            }
+        }
+
+        private void TypingButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (mode != Mode.Typing)
+            {
+                mode = Mode.Typing;
+                if (device != null && device.IsConnected) device.SetMode((int)mode);
+            }
+        }
+
+        private void MassageButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (mode != Mode.Massage)
+            {
+                mode = Mode.Massage;
+                if (device != null && device.IsConnected) device.SetMode((int)mode);
+            }
+        }
     }
 }

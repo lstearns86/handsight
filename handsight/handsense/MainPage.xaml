@@ -40,17 +40,25 @@
          -->
 
         <!--TitlePanel contains the name of the application and page title-->
-        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock Text="Handsight" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
-        </StackPanel>
+        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28"/>
 
         <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <Button x:Name="ConnectButton" Content="Connect" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="108" Width="436" Click="ConnectButton_Click"/>
-            <TextBlock x:Name="StatusLabel" HorizontalAlignment="Center" Margin="0,123,0,457" TextWrapping="Wrap" Text="Not Connected" VerticalAlignment="Center"/>
-            <Button x:Name="VibrateButton" Content="Vibrate" HorizontalAlignment="Left" Margin="10,516,0,0" VerticalAlignment="Top" Height="108" Width="436" Click="VibrateButton_Click"/>
-            <TextBlock x:Name="ValueLabel" HorizontalAlignment="Center" Margin="161,484,160,123" TextWrapping="Wrap" Text="Value: 0" VerticalAlignment="Center" Visibility="Collapsed"/>
-            <Canvas x:Name="Graph" HorizontalAlignment="Left" Height="268" Margin="0,191,0,0" VerticalAlignment="Top" Width="446"/>
+        <Grid x:Name="ContentPanel" Margin="12,124,12,10" Grid.RowSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10*"/>
+                <ColumnDefinition Width="9*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="ConnectButton" Content="Connect" HorizontalAlignment="Left" Margin="10,-122,0,0" VerticalAlignment="Top" Height="108" Width="436" Click="ConnectButton_Click" Grid.ColumnSpan="2"/>
+            <TextBlock x:Name="ValueLabel" HorizontalAlignment="Center" Margin="223,404,5,43" TextWrapping="Wrap" Text="Value: 0" VerticalAlignment="Center" Visibility="Collapsed"/>
+            <Canvas x:Name="Graph" HorizontalAlignment="Left" Height="227" Margin="0,27,0,0" VerticalAlignment="Top" Width="446" Grid.ColumnSpan="2"/>
+            <RadioButton x:Name="EdgesButton" Content="Edges" HorizontalAlignment="Left" Margin="10,405,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" IsChecked="True" Checked="EdgesButton_Checked"/>
+            <RadioButton x:Name="BlackButton" Content="Black" HorizontalAlignment="Left" Margin="239,405,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" Grid.ColumnSpan="2" Checked="BlackButton_Checked"/>
+            <RadioButton x:Name="GrayscaleButton" Content="Grayscale" HorizontalAlignment="Left" Margin="10,477,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" Checked="GrayscaleButton_Checked"/>
+            <RadioButton x:Name="NavigationButton" Content="Navigation" HorizontalAlignment="Left" Margin="239,477,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" Grid.ColumnSpan="2" Checked="NavigationButton_Checked"/>
+            <RadioButton x:Name="TypingButton" Content="Typing" HorizontalAlignment="Left" Margin="10,549,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" Checked="TypingButton_Checked"/>
+            <RadioButton x:Name="MassageButton" Content="Massage" HorizontalAlignment="Left" Margin="239,549,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" Grid.ColumnSpan="2" Checked="MassageButton_Checked"/>
+            <TextBlock x:Name="StatusLabel" HorizontalAlignment="Left" Margin="164,-22,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="Not Connected" Grid.ColumnSpan="2"/>
+            <TextBlock x:Name="TextDisplay" HorizontalAlignment="Left" Margin="10,295,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="110" Width="436" Grid.ColumnSpan="2"/>
 
         </Grid>
 
