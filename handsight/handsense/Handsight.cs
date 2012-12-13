@@ -52,7 +52,7 @@ namespace handsight
                             string line = new string(buffer);
                             string modeString = line.Substring(0, line.IndexOf(':'));
                             string valueString = line.Substring(line.IndexOf(':')+1, line.IndexOf('|')-2);
-                            string textString = line.Substring(line.IndexOf('|') + 1);
+                            string textString = line.Substring(line.IndexOf('|') + 1, line.IndexOf('\n') - line.IndexOf('|') - 1);
                             
                             int mode = 0;
                             int.TryParse(modeString, out mode);

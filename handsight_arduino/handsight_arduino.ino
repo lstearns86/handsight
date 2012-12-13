@@ -17,7 +17,7 @@ const int echo[] = {2, 10}; // pins to receive echo pulses
 const int trig[] = {4, 11}; // pins to send trigger pulses
 
 // thresholds for each finger
-const int detectionThreshold[] = {940,940,940,940};
+const int detectionThreshold[] = {940,960,970,975};
 const int whiteThreshold[] = {600,600,600,600};
 
 // timers (in milliseconds)
@@ -32,6 +32,7 @@ const int MODE_NAVIGATION = 3;
 const int MODE_TYPING = 4;
 const int MODE_MASSAGE = 5;
 const int numModes = 6;
+const char modeChars[] = {'0', '1', '2', '3', '4', '5'};
 int mode = MODE_EDGES;
 boolean modeLEDon = false;
 int modeLightStart = 0;
@@ -106,17 +107,12 @@ void serialRead()
   while(Serial.available() > 0)
   {
     byte command = Serial.read();
-    switch(command)
-    {
-      case MODE_EDGES: mode = MODE_EDGES; break;
-      case MODE_BLACK: mode = MODE_BLACK; break;
-      case MODE_GRAYSCALE: mode = MODE_GRAYSCALE; break;
-      case MODE_NAVIGATION: mode = MODE_NAVIGATION; break;
-      case MODE_TYPING: mode = MODE_TYPING; break;
-      case MODE_MASSAGE: mode = MODE_MASSAGE; break;
-      // TODO add commands for programming bluetooth
-      default: break; // do nothing if we don't recognize the command
-    }
+    if(command == modeChars[MODE_EDGES] || command == MODE_EDGES) mode = MODE_EDGES;
+    else if(command == modeChars[MODE_BLACK] || command == MODE_BLACK) mode = MODE_BLACK;
+    else if(command == modeChars[MODE_GRAYSCALE] || command == MODE_GRAYSCALE) mode = MODE_GRAYSCALE;
+    else if(command == modeChars[MODE_NAVIGATION] || command == MODE_NAVIGATION) mode = MODE_NAVIGATION;
+    else if(command == modeChars[MODE_TYPING] || command == MODE_TYPING) mode = MODE_TYPING;
+    else if(command == modeChars[MODE_MASSAGE] || command == MODE_MASSAGE) mode = MODE_MASSAGE;
     
     // turn off the vibration motors for now
     for(int i = 0; i < numFingers; i++)
@@ -158,12 +154,12 @@ void serialWrite()
 void flashMode()
 {
   int now = millis();
-  int onDuration = 1000 / (numModes * 2);
-  int index = ((now - modeLightStart) % 1000) / onDuration;
+  int onDuration = 2000 / (numModes * 2);
+  int index = ((now - modeLightStart) % 2000) / onDuration;
   boolean on = index % 2 == 0 && index / 2 <= mode;
   if(on && !modeLEDon) { digitalWrite(modeLED, HIGH); modeLEDon = true; }
   else if(!on && modeLEDon) { digitalWrite(modeLED, LOW); modeLEDon = false; }
-  if(now - modeLightStart > 1000) modeLightStart = now;
+  if(now - modeLightStart > 2000) modeLightStart = now;
 }
 
 void edgeLoop()
@@ -236,7 +232,7 @@ void grayscaleLoop()
   {
     if(readings[i] < detectionThreshold[i])
     {
-      analogWrite(vibrations[i], (int)(255.0 * readings[i] / detectionThreshold[i]));
+      analogWrite(vibrations[i], (int)(55.0 + 200.0 * readings[i] / detectionThreshold[i]));
       vibrating[i] = true;
     }
     else
@@ -306,20 +302,42 @@ void navLoop()
 
 void typingLoop()
 {
+  int now = millis();
+
+  // check whether it's time to turn the vibration off
+  for(int i = 0; i < numFingers; i++)
+    if(vibrating[i] && now - lastVibration[i] > vibrationDuration)
+    {
+      digitalWrite(vibrations[i], LOW);
+      vibrating[i] = false;
+    }
+      
   // get the current readings
   for(int i = 0; i < numFingers; i++)
     readings[i] = analogRead(collectors[i]);
+    
+  // check whether we should turn on the vibration
+  for(int i = 0; i < numFingers; i++)
+    if(!vibrating[i] && now - lastVibration[i] > vibrationDelay && 
+       ((lastReadings[i] < detectionThreshold[i] && readings[i] >= detectionThreshold[i]) ||
+        (lastReadings[i] >= detectionThreshold[i] && readings[i] < detectionThreshold[i])))
+    {
+      digitalWrite(vibrations[i], HIGH);
+      lastVibration[i] = millis();
+      vibrating[i] = true;
+    }
   
   //typing mode
   int currently_on=0;
   int keys_down=0;
   for(int i=0; i<numFingers; i++) {
     int button_down = readings[i]<detectionThreshold[i];
-    digitalWrite(vibrations[i], button_down);
     currently_on=currently_on<<1 | button_down;
     keys_down += button_down;
   }
-  if(been_on && !currently_on) {
+  int stillVibrating = 0; // wait until vibrating stops to avoid noise around threshold causing repeating characters
+  for(int i = 0; i < numFingers; i++) if(vibrating[i]) stillVibrating++;
+  if(been_on && !currently_on && !stillVibrating) {
     char outkey=mapping[been_on];
     for(int j = 0; j < 16; j++)
       if(textBuffer[j] == 0)
@@ -330,6 +348,10 @@ void typingLoop()
     been_on = 0;
   }
   been_on|=currently_on;
+  
+  // update the previous readings with the current
+  for(int i = 0; i < numFingers; i++)
+    lastReadings[i] = readings[i];
 }
 
 void loop() {
@@ -341,6 +363,7 @@ void loop() {
     case MODE_BLACK: blackLoop(); break;
     case MODE_GRAYSCALE: grayscaleLoop(); break;
     case MODE_NAVIGATION: navLoop(); break;
+    case MODE_TYPING: typingLoop(); break;
     case MODE_MASSAGE: massageLoop(); break;
     default: break;
   }

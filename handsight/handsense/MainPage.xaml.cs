@@ -49,8 +49,9 @@ namespace handsight
                 line.X2 = line.X1;
                 line.Y1 = 0;
                 line.Y2 = Graph.Height;
-                line.Stroke = new SolidColorBrush(Colors.Green);
-                line.Fill = new SolidColorBrush(Colors.Green);
+                System.Windows.Media.Color color = i < 4 ? Colors.Green : Colors.Blue;
+                line.Stroke = new SolidColorBrush(color);
+                line.Fill = new SolidColorBrush(color);
                 line.StrokeThickness = 30;
                 lines.Add(line);
                 Graph.Children.Add(line);
@@ -109,13 +110,15 @@ namespace handsight
                 for (int i = 0; i < 6; i++)
                 {
                     sensors[i] = values[i];
-                    lines[i].Y1 = (1 - values[i] / 1024.0) * Graph.Height;
+                    double v = i < 4 ? values[i] / 1024.0 : values[i] / 200.0;
+                    double height = i < 4 ? v * Graph.Height : (this.mode == Mode.Navigation ? v * Graph.Height : Graph.Height);
+                    lines[i].Y1 = height;
                 }
                 
                 if (text.Length > 0)
                 {
                     TextDisplay.Text += text;
-                    if (TextDisplay.Text.Length > 50)
+                    if (TextDisplay.Text.Length > 200)
                         TextDisplay.Text = TextDisplay.Text.Substring(TextDisplay.Text.Length - 50, 50);
                 }
             });
