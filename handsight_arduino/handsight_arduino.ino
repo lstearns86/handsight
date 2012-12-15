@@ -17,8 +17,8 @@ const int echo[] = {2, 10}; // pins to receive echo pulses
 const int trig[] = {4, 11}; // pins to send trigger pulses
 
 // thresholds for each finger
-const int detectionThreshold[] = {940,960,970,975};
-const int whiteThreshold[] = {600,600,600,600};
+int detectionThreshold[] = {940,960,970,975};
+int whiteThreshold[] = {600,600,600,600};
 
 // timers (in milliseconds)
 int lastVibration[] = {0,0,0,0};
@@ -31,6 +31,9 @@ const int MODE_GRAYSCALE = 2;
 const int MODE_NAVIGATION = 3;
 const int MODE_TYPING = 4;
 const int MODE_MASSAGE = 5;
+const int CALIBRATE_DETECTION = 10;
+const int CALIBRATE_BLACK = 11;
+const int CALIBRATE_WHITE = 12;
 const int numModes = 6;
 const char modeChars[] = {'0', '1', '2', '3', '4', '5'};
 int mode = MODE_EDGES;
@@ -42,6 +45,9 @@ const int numFingers = 4;
 const int numUltrasonic = 2;
 int readings[] = {1023, 1023, 1023, 1023, 1023, 1023};
 int lastReadings[] = {1023, 1023, 1023, 1023, 1023, 1023};
+int high[] = {1023, 1023, 1023, 1023};
+int mid[] = {900, 900, 900, 900};
+int low[] = {200, 200, 200, 200};
 const int serialRate = 100; // in milliseconds
 int lastSerialWrite = 0;
 const int pingRate = 50; // in milliseconds
@@ -60,7 +66,8 @@ int echoTimeout = maxDist * 2 * 29; // in microseconds
 
 // typing
 // mapping from finger bits to characters
-const char mapping[]="# aroslyepxmhgujtndcwbq?ifkz.v^<";
+//const char mapping[]="# aroslyepxmhgujtndcwbq?ifkz.v^<";
+const char mapping[]="# sadxintxxxhxg\xb2";
 int backspace_initial_delay=200;
 int backspace_repeat_delay=50;
 int backspace_time=0;
@@ -107,22 +114,51 @@ void serialRead()
   while(Serial.available() > 0)
   {
     byte command = Serial.read();
-    if(command == modeChars[MODE_EDGES] || command == MODE_EDGES) mode = MODE_EDGES;
-    else if(command == modeChars[MODE_BLACK] || command == MODE_BLACK) mode = MODE_BLACK;
-    else if(command == modeChars[MODE_GRAYSCALE] || command == MODE_GRAYSCALE) mode = MODE_GRAYSCALE;
-    else if(command == modeChars[MODE_NAVIGATION] || command == MODE_NAVIGATION) mode = MODE_NAVIGATION;
-    else if(command == modeChars[MODE_TYPING] || command == MODE_TYPING) mode = MODE_TYPING;
-    else if(command == modeChars[MODE_MASSAGE] || command == MODE_MASSAGE) mode = MODE_MASSAGE;
     
-    // turn off the vibration motors for now
-    for(int i = 0; i < numFingers; i++)
+    if(command == CALIBRATE_DETECTION)
     {
-      digitalWrite(vibrations[i], LOW);
-      vibrating[i] = false;
+      for(int i = 0; i < numFingers; i++)
+      {
+        high[i] = analogRead(collectors[i]);
+        detectionThreshold[i] = (high[i] + mid[i]) / 2;
+      }
     }
-    
-    // save the current mode when we power off
-    EEPROM.write(0, mode);
+    else if (command == CALIBRATE_BLACK)
+    {
+      for(int i = 0; i < numFingers; i++)
+      {
+        mid[i] = analogRead(collectors[i]);
+        detectionThreshold[i] = (high[i] + mid[i]) / 2;
+        whiteThreshold[i] = (mid[i] + low[i]) / 2;
+      }
+    }
+    else if(command == CALIBRATE_WHITE)
+    {
+      for(int i = 0; i < numFingers; i++)
+      {
+        low[i] = analogRead(collectors[i]);
+        whiteThreshold[i] = (mid[i] + low[i]) / 2;
+      }
+    }
+    else
+    {
+      if(command == modeChars[MODE_EDGES] || command == MODE_EDGES) mode = MODE_EDGES;
+      else if(command == modeChars[MODE_BLACK] || command == MODE_BLACK) mode = MODE_BLACK;
+      else if(command == modeChars[MODE_GRAYSCALE] || command == MODE_GRAYSCALE) mode = MODE_GRAYSCALE;
+      else if(command == modeChars[MODE_NAVIGATION] || command == MODE_NAVIGATION) mode = MODE_NAVIGATION;
+      else if(command == modeChars[MODE_TYPING] || command == MODE_TYPING) mode = MODE_TYPING;
+      else if(command == modeChars[MODE_MASSAGE] || command == MODE_MASSAGE) mode = MODE_MASSAGE;
+      
+      // turn off the vibration motors for now
+      for(int i = 0; i < numFingers; i++)
+      {
+        digitalWrite(vibrations[i], LOW);
+        vibrating[i] = false;
+      }
+      
+      // save the current mode when we power off
+      EEPROM.write(0, mode);
+    }
   }
 }
 
@@ -135,6 +171,9 @@ void serialWrite()
     Serial.print(":");
     for(int i = 0; i < numFingers + numUltrasonic; i++)
     {
+      if(readings[i] >= detectionThreshold[i]) Serial.print('+');
+      else if(readings[i] < whiteThreshold[i]) Serial.print('-');
+      else Serial.print('=');
       Serial.print(readings[i]);
       Serial.print(",");
     }
@@ -211,7 +250,7 @@ void blackLoop()
       vibrating[i] = true;
       lastVibration[i] = now;
     }
-    else if(now - lastVibration[i] > vibrationDuration)
+    else // if(now - lastVibration[i] > vibrationDuration)
     {
       digitalWrite(vibrations[i], LOW);
       vibrating[i] = false;

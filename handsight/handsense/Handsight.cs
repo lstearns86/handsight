@@ -28,9 +28,9 @@ namespace handsight
             StartListening();
         }
 
-        public delegate void UpdateDelegate(int mode, int[] values, string text);
+        public delegate void UpdateDelegate(int mode, int[] values, char[] types, string text);
         public event UpdateDelegate Update;
-        private void OnUpdate(int mode, int[] values, string text) { if (Update != null) Update(mode, values, text); }
+        private void OnUpdate(int mode, int[] values, char[] types, string text) { if (Update != null) Update(mode, values, types, text); }
 
         private char[] buffer = new char[256];
         int bufferIndex = 0;
@@ -59,14 +59,26 @@ namespace handsight
 
                             string[] parts = valueString.Split(',');
                             int[] values = new int[6];
+                            char[] types = new char[4];
                             for (int i = 0; i < Math.Min(6, parts.Length); i++)
                             {
-                                int value = 0;
-                                int.TryParse(parts[i], out value);
-                                values[i] = value;
+                                if (i < 4)
+                                {
+                                    char type = parts[i][0];
+                                    types[i] = type;
+                                    int value = 0;
+                                    int.TryParse(parts[i].Substring(1), out value);
+                                    values[i] = value;
+                                }
+                                else
+                                {
+                                    int value = 0;
+                                    int.TryParse(parts[i].Substring(1), out value);
+                                    values[i] = value;
+                                }
                             }
 
-                            OnUpdate(mode, values, textString);
+                            OnUpdate(mode, values, types, textString);
                             bufferIndex = 0;
                         }
                         else
@@ -88,6 +100,18 @@ namespace handsight
             }
 
             WriteCommand(_dataWriter, (byte)mode);
+
+            await _dataWriter.StoreAsync();
+        }
+
+        public async void Calibrate(int type)
+        {
+            if (_socket == null || _dataWriter == null)
+            {
+                throw new InvalidOperationException("Handsense not connected");
+            }
+
+            WriteCommand(_dataWriter, (byte)type);
 
             await _dataWriter.StoreAsync();
         }

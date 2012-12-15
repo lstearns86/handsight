@@ -50,7 +50,7 @@
             </Grid.ColumnDefinitions>
             <Button x:Name="ConnectButton" Content="Connect" HorizontalAlignment="Left" Margin="10,-122,0,0" VerticalAlignment="Top" Height="108" Width="436" Click="ConnectButton_Click" Grid.ColumnSpan="2"/>
             <TextBlock x:Name="ValueLabel" HorizontalAlignment="Center" Margin="223,404,5,43" TextWrapping="Wrap" Text="Value: 0" VerticalAlignment="Center" Visibility="Collapsed"/>
-            <Canvas x:Name="Graph" HorizontalAlignment="Left" Height="227" Margin="0,27,0,0" VerticalAlignment="Top" Width="446" Grid.ColumnSpan="2"/>
+            <Canvas x:Name="Graph" HorizontalAlignment="Left" Height="190" Margin="0,27,0,0" VerticalAlignment="Top" Width="446" Grid.ColumnSpan="2"/>
             <RadioButton x:Name="EdgesButton" Content="Edges" HorizontalAlignment="Left" Margin="10,405,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" IsChecked="True" Checked="EdgesButton_Checked"/>
             <RadioButton x:Name="BlackButton" Content="Black" HorizontalAlignment="Left" Margin="239,405,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" Grid.ColumnSpan="2" Checked="BlackButton_Checked"/>
             <RadioButton x:Name="GrayscaleButton" Content="Grayscale" HorizontalAlignment="Left" Margin="10,477,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" Checked="GrayscaleButton_Checked"/>
@@ -58,7 +58,10 @@
             <RadioButton x:Name="TypingButton" Content="Typing" HorizontalAlignment="Left" Margin="10,549,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" Checked="TypingButton_Checked"/>
             <RadioButton x:Name="MassageButton" Content="Massage" HorizontalAlignment="Left" Margin="239,549,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.706,0.213" GroupName="ModeGroup" Grid.ColumnSpan="2" Checked="MassageButton_Checked"/>
             <TextBlock x:Name="StatusLabel" HorizontalAlignment="Left" Margin="164,-22,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="Not Connected" Grid.ColumnSpan="2"/>
-            <TextBlock x:Name="TextDisplay" HorizontalAlignment="Left" Margin="10,295,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="110" Width="436" Grid.ColumnSpan="2"/>
+            <TextBlock x:Name="TextDisplay" HorizontalAlignment="Left" Margin="10,234,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="110" Width="436" Grid.ColumnSpan="2" FontSize="36"/>
+            <Button x:Name="AirButton" Content="Air" Margin="10,333,102,0" VerticalAlignment="Top" Width="130" Click="AirButton_Click"/>
+            <Button x:Name="BlackButton1" Content="Black" HorizontalAlignment="Left" Margin="168,333,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="130" Click="BlackButton_Click"/>
+            <Button x:Name="WhiteButton" Content="White" HorizontalAlignment="Left" Margin="82,333,0,0" VerticalAlignment="Top" Grid.Column="1" Width="130" Click="WhiteButton_Click"/>
 
         </Grid>
 

@@ -21,6 +21,7 @@ using System.Diagnostics;
 using Windows.Storage.Streams;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace handsight
 {
@@ -87,7 +88,7 @@ namespace handsight
             }
         }
 
-        private void DeviceUpdate(int mode, int[] values, string text)
+        private void DeviceUpdate(int mode, int[] values, char[] types, string text)
         {
             Dispatcher.BeginInvoke(() =>
             {
@@ -112,12 +113,20 @@ namespace handsight
                     sensors[i] = values[i];
                     double v = i < 4 ? values[i] / 1024.0 : values[i] / 200.0;
                     double height = i < 4 ? v * Graph.Height : (this.mode == Mode.Navigation ? v * Graph.Height : Graph.Height);
+                    if (i < 4)
+                    {
+                        if (types[i] == '+') { lines[i].Stroke = new SolidColorBrush(Colors.Red); }
+                        else if (types[i] == '=') { lines[i].Stroke = new SolidColorBrush(Colors.Green); }
+                        else if (types[i] == '-') { lines[i].Stroke = new SolidColorBrush(Colors.White); }
+                    }
                     lines[i].Y1 = height;
                 }
                 
                 if (text.Length > 0)
                 {
                     TextDisplay.Text += text;
+                    TextDisplay.Text = Regex.Replace(TextDisplay.Text, ".\xb2", "");
+                    TextDisplay.Text = Regex.Replace(TextDisplay.Text, "\xb2", "");
                     if (TextDisplay.Text.Length > 200)
                         TextDisplay.Text = TextDisplay.Text.Substring(TextDisplay.Text.Length - 50, 50);
                 }
@@ -212,6 +221,21 @@ namespace handsight
                 mode = Mode.Massage;
                 if (device != null && device.IsConnected) device.SetMode((int)mode);
             }
+        }
+
+        private void AirButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (device != null && device.IsConnected) device.Calibrate(10);
+        }
+
+        private void BlackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (device != null && device.IsConnected) device.Calibrate(11);
+        }
+
+        private void WhiteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (device != null && device.IsConnected) device.Calibrate(12);
         }
     }
 }
